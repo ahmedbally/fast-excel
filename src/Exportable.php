@@ -2,8 +2,9 @@
 
 namespace Rap2hpoutre\FastExcel;
 
-use Box\Spout\Writer\Style\Style;
-use Box\Spout\Writer\WriterFactory;
+use Box\Spout\Common\Entity\Style\Style;
+use Box\Spout\Common\Type;
+use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 use Generator;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
@@ -36,6 +37,16 @@ trait Exportable
      */
     abstract protected function setOptions(&$reader_or_writer);
 
+    private function getWriter($path){
+        switch ($this->getType($path)){
+            case Type::CSV:
+                return WriterEntityFactory::createCSVWriter();
+            case Type::ODS:
+                return WriterEntityFactory::createODSWriter();
+            default:
+                return WriterEntityFactory::createXLSXWriter();
+        }
+    }
     /**
      * @param string        $path
      * @param callable|null $callback
@@ -90,7 +101,7 @@ trait Exportable
      */
     private function exportOrDownload($path, $function, callable $callback = null)
     {
-        $writer = WriterFactory::create($this->getType($path));
+        $writer = $this->getWriter($path);
         $this->setOptions($writer);
         /* @var \Box\Spout\Writer\WriterInterface $writer */
         $writer->$function($path);

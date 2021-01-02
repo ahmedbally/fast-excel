@@ -2,7 +2,8 @@
 
 namespace Rap2hpoutre\FastExcel;
 
-use Box\Spout\Reader\ReaderFactory;
+use Box\Spout\Common\Type;
+use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Box\Spout\Reader\SheetInterface;
 use Illuminate\Support\Collection;
 
@@ -32,6 +33,17 @@ trait Importable
      */
     abstract protected function setOptions(&$reader_or_writer);
 
+    private function getReader($path){
+        switch ($this->getType($path)){
+            case Type::CSV:
+                return ReaderEntityFactory::createCSVReader();
+            case Type::ODS:
+                return ReaderEntityFactory::createODSReader();
+            default:
+                return ReaderEntityFactory::createXLSXReader();
+        }
+
+    }
     /**
      * @param string        $path
      * @param callable|null $callback
@@ -90,7 +102,7 @@ trait Importable
      */
     private function reader($path)
     {
-        $reader = ReaderFactory::create($this->getType($path));
+        $reader = $this->getReader($path);
         $this->setOptions($reader);
         /* @var \Box\Spout\Reader\ReaderInterface $reader */
         $reader->open($path);
