@@ -124,6 +124,7 @@ trait Importable
 
         if ($this->with_header) {
             foreach ($sheet->getRowIterator() as $k => $row) {
+                $row = $row->toArray();
                 if ($k == 1) {
                     $headers = $this->toStrings($row);
                     $count_header = count($headers);

@@ -145,12 +145,11 @@ trait Exportable
         if ($this->with_header) {
             $this->writeHeader($writer, $collection->first());
         }
+        $rows = [];
         // Write all rows
-        if ($this->rows_style) {
-            $writer->addRowsWithStyle($collection->toArray(), $this->rows_style);
-        } else {
-            $writer->addRows($collection->toArray());
-        }
+        foreach ($collection as $item)
+            $rows[] = WriterEntityFactory::createRowFromArray($item->toArray(),$this->rows_style);
+        $writer->addRows($rows);
     }
 
     private function writeRowsFromGenerator($writer, Generator $generator, ?callable $callback = null)
@@ -169,11 +168,8 @@ trait Exportable
                 $this->writeHeader($writer, $item);
             }
             // Write rows (one by one).
-            if ($this->rows_style) {
-                $writer->addRowWithStyle($item->toArray(), $this->rows_style);
-            } else {
-                $writer->addRow($item->toArray());
-            }
+            $row = WriterEntityFactory::createRowFromArray($item->toArray(),$this->rows_style);
+            $writer->addRow($row);
         }
     }
 
@@ -194,11 +190,8 @@ trait Exportable
         }
 
         $keys = array_keys(is_array($first_row) ? $first_row : $first_row->toArray());
-        if ($this->header_style) {
-            $writer->addRowWithStyle($keys, $this->header_style);
-        } else {
-            $writer->addRow($keys);
-        }
+        $row = WriterEntityFactory::createRowFromArray($keys,$this->header_style);
+        $writer->addRow($row);
     }
 
     /**
